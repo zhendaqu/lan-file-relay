@@ -1,0 +1,4 @@
+# 每行一个账户，格式为 用户名:密码
+# 空行和以 # 开头的行会被忽略。密码至少 6 个字符。
+alice:change-this-password
+bob:another-password

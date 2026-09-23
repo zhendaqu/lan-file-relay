@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <title> </title>
+  <link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <main id="login" class="login-shell" aria-live="polite">
+    <form id="login-form" class="terminal" autocomplete="on">
+      <div class="terminal-line muted">session</div>
+      <label class="terminal-line"><span>login:</span><input id="username" name="username" autocomplete="username" maxlength="32" autofocus></label>
+      <label class="terminal-line"><span>password:</span><input id="password" name="password" type="password" autocomplete="current-password" maxlength="256"></label>
+      <div class="terminal-line"><span>$</span><button type="submit" class="terminal-submit">enter</button><i class="cursor" aria-hidden="true"></i></div>
+      <p id="login-message" class="terminal-message" role="status">新用户名会在首次登录时创建</p>
+    </form>
+  </main>
+
+  <main id="workspace" class="workspace" hidden>
+    <header class="topbar">
+      <span id="current-user"></span>
+      <button id="logout" class="text-button" type="button">退出</button>
+    </header>
+
+    <section id="drop-zone" class="drop-zone" tabindex="0" role="button" aria-label="选择或拖入文件上传">
+      <input id="file-input" type="file" multiple hidden>
+      <p>拖入文件</p>
+      <button id="choose-files" class="button" type="button">选择文件</button>
+      <small id="upload-note">大文件自动分块、校验并可续传</small>
+    </section>
+
+    <section id="queue-section" class="queue-section" hidden aria-label="上传队列">
+      <div id="queue" class="queue"></div>
+    </section>
+
+    <section class="files-section" aria-labelledby="files-heading">
+      <div class="section-head">
+        <h1 id="files-heading">暂存</h1>
+        <span id="summary" class="muted"></span>
+      </div>
+      <div id="empty" class="empty">这里还没有文件</div>
+      <div id="files" class="files"></div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>
+
