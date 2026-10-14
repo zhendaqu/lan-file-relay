@@ -24,6 +24,7 @@ import mimetypes
 import os
 import signal
 import socket
+import sys
 import threading
 import time
 import uuid
@@ -32,7 +33,10 @@ from urllib.parse import parse_qs, quote, unquote, urlparse
 
 # ---------------------------------------------------------------- 配置
 
-HERE = os.path.dirname(os.path.abspath(__file__))
+if getattr(sys, "frozen", False):            # 打包成 exe 后，数据存在 exe 旁边，而不是临时目录
+    HERE = os.path.dirname(os.path.abspath(sys.executable))
+else:
+    HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.environ.get("SHARE_DATA") or os.path.join(HERE, "share_data")
 FILES_DIR = os.path.join(DATA_DIR, "files")
 STATE_FILE = os.path.join(DATA_DIR, "state.json")
@@ -647,27 +651,32 @@ pick.onchange = () => { upload(pick.files); pick.value = ''; };
 let dragDepth = 0, lastDrag = 0;
 const veil = $('#veil');
 function hasFiles(e){
-  return e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
+  if (!e.dataTransfer) return false;
+  if (Array.from(e.dataTransfer.types || []).includes('Files')) return true;
+  const items = e.dataTransfer.items;                 // 部分浏览器拖拽时 types 为空，兜底看 items
+  if (items) for (const it of items) if (it.kind === 'file') return true;
+  return false;
 }
 function hideVeil(){ dragDepth = 0; veil.classList.remove('on'); }
 addEventListener('dragenter', e => {
+  e.preventDefault();                                 // 让浏览器允许在此处 drop
   if (!hasFiles(e)) return;
-  e.preventDefault(); dragDepth++; lastDrag = Date.now(); veil.classList.add('on');
+  dragDepth++; lastDrag = Date.now(); veil.classList.add('on');
 });
 addEventListener('dragover', e => {
+  e.preventDefault();                                 // 不阻止默认的话 drop 不会触发
   if (!hasFiles(e)) return;
-  e.preventDefault(); lastDrag = Date.now(); veil.classList.add('on');
+  lastDrag = Date.now(); veil.classList.add('on');
 });
 addEventListener('dragleave', e => {
-  if (!hasFiles(e)) return;
   dragDepth = Math.max(0, dragDepth - 1);
   if (!dragDepth) veil.classList.remove('on');
 });
 addEventListener('dragend', hideVeil);
 addEventListener('drop', e => {
-  if (!hasFiles(e)) return;
-  e.preventDefault(); hideVeil();
-  upload(e.dataTransfer.files);
+  e.preventDefault();                                 // 阻止浏览器直接打开/下载文件，交给上传
+  hideVeil();
+  if (hasFiles(e)) upload(e.dataTransfer.files);
 });
 // 兜底：鼠标已经离开窗口但仍收到过 dragenter 时，收起遮罩
 setInterval(() => { if (veil.classList.contains('on') && Date.now() - lastDrag > 800) hideVeil(); }, 400);
